@@ -4,19 +4,11 @@ from pathlib import Path
 from jazzgen_model import JazzGenModel
 # import torch.nn
 # import torch.optim as optim
-
-def access_pickle_data(filename):
-    with open(filename, 'rb') as f:
-        rep_seqs = pickle.load(f)
-    return rep_seqs
-
-def store_pickle_data(filename, data):
-    with open(filename, 'wb') as f:
-        pickle.dump(data, f)
+import utils
 
 def make_corpus(rep_seqs, corpus_cache_filename=None, use_cache=True):
     if use_cache and corpus_cache_filename is not None and Path(corpus_cache_filename).exists():
-        return access_pickle_data(corpus_cache_filename)
+        return utils.access_pickle_data(corpus_cache_filename)
     
     rep_corpus = {}
     for seq in rep_seqs:
@@ -25,7 +17,7 @@ def make_corpus(rep_seqs, corpus_cache_filename=None, use_cache=True):
                 rep_corpus[rep] = len(rep_corpus)
     
     if corpus_cache_filename is not None:
-        store_pickle_data(filename=corpus_cache_filename, data=rep_corpus)
+        utils.store_pickle_data(filename=corpus_cache_filename, data=rep_corpus)
     
     return rep_corpus
 
@@ -119,7 +111,7 @@ if __name__ == '__main__':
     corpus_cache_filename = 'cached/toy_rep_corpus.pkl'
     model_filename = 'cached/toy_model.pt'
 
-    rep_seqs = access_pickle_data(filename=rep_seqs_filename)
+    rep_seqs = utils.access_pickle_data(filename=rep_seqs_filename)
     rep_corpus = make_corpus(rep_seqs=rep_seqs, corpus_cache_filename=corpus_cache_filename, use_cache=False)
     model = train_model(rep_seqs=rep_seqs, rep_corpus=rep_corpus)
     save_model(model=model, filename=model_filename)
