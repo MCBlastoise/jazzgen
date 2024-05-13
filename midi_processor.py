@@ -107,7 +107,7 @@ def smallest_interval_in_file(music_file):
         return float('inf')
 
 if __name__ == '__main__':
-    root_folder = 'tests/muse'
+    root_folder = 'raw_data'
     out_filename = 'cached/muse_rep_seqs.pkl'
 
     # interval = calculate_smallest_interval(music_directory='tests/muse') # TODO: EXAMINE THIS! TRADEOFFS ARE BETWEEN USING THE MOST FINE-GRAINED INTERVAL FROM THE CORPUS OR A MORE COARSE APPROACH

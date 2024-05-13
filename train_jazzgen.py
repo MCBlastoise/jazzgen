@@ -23,11 +23,18 @@ def make_corpus(rep_seqs, corpus_cache_filename=None, use_cache=True):
 
 def make_training_pairs(rep_seq):
     MIN_SEQ_SIZE = 2
+    MAX_SEQ_SIZE = 10
     if len(rep_seq) < MIN_SEQ_SIZE:
         print("Sequence too short", rep_seq)
     else:
         for ix, _ in enumerate(rep_seq[:-1]):
-            pair = rep_seq[ : ix + 1], rep_seq[ix + 1 : ix + 2]
+            start_seq_idx = max(ix + 1 - MAX_SEQ_SIZE, 0)
+            end_seq_idx = ix + 1
+            music_prefix = rep_seq[ start_seq_idx : end_seq_idx ]
+
+            next_sound = rep_seq[ix + 1 : ix + 2]
+
+            pair = music_prefix, next_sound
             yield pair
 
 def make_training_data(rep_seqs):
@@ -58,40 +65,28 @@ def train_model(rep_seqs, rep_corpus: dict[tuple[int, int], int]):
 
     NUM_EPOCHS = 5
     for epoch in range(NUM_EPOCHS):  # again, normally you would NOT do 300 epochs, it is toy data
-        print("Starting epoch", epoch)
+        print(f"Starting epoch {epoch + 1}")
         
         training_data = list(make_training_data(rep_seqs=rep_seqs))
         for music_prefix, next_sound in training_data:
-            # print("Prefix", music_prefix, "next", next_sound)
-            
+
             # Step 1. Remember that Pytorch accumulates gradients.
             # We need to clear them out before each instance
             model.zero_grad()
 
             # Step 2. Get our inputs ready for the network, that is, turn them into
-            # Tensors of word indices.
+            # Tensors of indices.
 
             music_in = prepare_sequence(seq=music_prefix, rep_corpus=rep_corpus)
             target_out = prepare_sequence(seq=next_sound, rep_corpus=rep_corpus)
-
-            # print(music_in.shape)
-            # print(target_out.shape)
 
             # Step 3. Run our forward pass.
             tag_scores = model(music_in)
             reshaped_tag_scores = tag_scores.view(1, -1)
 
-            # print("reshaped shape", reshaped_tag_scores.shape)
-
-            # print("s", tag_scores.shape, reshaped_tag_scores.shape, target_out.shape)
-
-            # print("t", tag_scores.shape, target_out.shape)
-
             # Step 4. Compute the loss, gradients, and update the parameters by
             #  calling optimizer.step()
             loss = loss_function(reshaped_tag_scores, target_out)
-
-            # print(tag_scores.shape, target_out.shape)
 
             loss.backward()
             optimizer.step()
@@ -103,13 +98,9 @@ def save_model(model, filename):
     torch.save(state_dict, filename)
 
 if __name__ == '__main__':
-    ...
-    # rep_seqs_filename = 'rep_seqs.pkl'
-    # corpus_cache_filename = 'rep_corpus.pkl'
-
-    rep_seqs_filename = 'cached/toy_rep_seqs.pkl'
-    corpus_cache_filename = 'cached/toy_rep_corpus.pkl'
-    model_filename = 'cached/toy_model.pt'
+    rep_seqs_filename = 'cached/muse_rep_seqs.pkl'
+    corpus_cache_filename = 'cached/muse_rep_corpus.pkl'
+    model_filename = 'cached/muse_model.pt'
 
     rep_seqs = utils.access_pickle_data(filename=rep_seqs_filename)
     rep_corpus = make_corpus(rep_seqs=rep_seqs, corpus_cache_filename=corpus_cache_filename, use_cache=False)

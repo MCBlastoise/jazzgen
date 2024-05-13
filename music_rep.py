@@ -1,4 +1,5 @@
 import music21
+from jazzgen_exceptions import JazzGenException
 
 class MusicInstance:
     """
@@ -29,6 +30,13 @@ class MusicInstance:
     
     def __hash__(self) -> int:
         return hash(self.objs)
+    
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, MusicInstance):
+            return False
+        if self.interval != other.interval:
+            raise JazzGenException("MusicInstance objects with different intervals. Should not ever happen in the same training set.")
+        return self.objs == other.objs
 
     def __repr__(self) -> str:
         return str(self.objs)
