@@ -1,6 +1,7 @@
 import pickle
 from pathlib import Path
 import subprocess
+import music21
 
 def access_pickle_data(filename):
     with open(filename, 'rb') as f:
@@ -26,3 +27,9 @@ def convert_file_to_mxl(midi_filename, mxl_directory):
 
     conversion_tokens = ['mscore', '-o', mxl_pathname, midi_filename]
     subprocess.run(conversion_tokens, stderr=subprocess.DEVNULL)
+
+def show_files_in_msc(music_directory):
+    p = Path(music_directory)
+    for subpath in p.iterdir():
+        s = music21.converter.parse(subpath)
+        s.show()
