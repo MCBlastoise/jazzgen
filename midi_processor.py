@@ -41,7 +41,7 @@ def extract_music_buckets(piano_stream, interval):
         offset_start = offset_idx * interval + start_offset
         offset_end = offset_start + interval
 
-        music_instance_obj = MusicInstance()
+        music_instance_obj = MusicInstance(interval)
         
         elems = ns.getElementsByOffset(
             offsetStart=offset_start,

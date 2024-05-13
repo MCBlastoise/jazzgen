@@ -1,8 +1,14 @@
 import music21
 
 class MusicInstance:
-    def __init__(self):
+    """
+    A MusicInstance object is a representation of the music happening in some fixed interval of time.
+    I.e. one object corresponds to one quarter note unit of time (the exact unit depends on interval specified).
+    """
+    
+    def __init__(self, interval):
         self.objs = frozenset()
+        self.interval = interval
     
     def add_m21_obj(self, m21_obj):
         internal_obj = self.m21_to_internal(m21_obj)
