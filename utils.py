@@ -8,3 +8,6 @@ def access_pickle_data(filename):
 def store_pickle_data(filename, data):
     with open(filename, 'wb') as f:
         pickle.dump(data, f)
+
+def stream_to_midi(stream, filename):
+    raise NotImplementedError
