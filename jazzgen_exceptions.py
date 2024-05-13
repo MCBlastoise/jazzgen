@@ -1,0 +1,2 @@
+class JazzGenException(Exception):
+    pass
