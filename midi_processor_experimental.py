@@ -5,9 +5,7 @@ import math
 import pickle
 import subprocess
 from music_rep import MusicInstance
-
-class JazzGenException(Exception):
-    pass
+from jazzgen_exceptions import JazzGenException
 
 
 
@@ -24,13 +22,13 @@ def make_music_rep(time_instance_obj):
 def make_rep_seq(seq):
     return [ make_music_rep(m21_obj) for m21_obj in seq ]
 
-def get_offset_val(offset: float | fractions.Fraction) -> float:
-    if isinstance(offset, float):
-        return offset
-    elif isinstance(offset, fractions.Fraction):
-        return offset.numerator / offset.denominator
-    else:
-        raise TypeError("Offset was not a float or a fraction")
+# def get_offset_val(offset: float | fractions.Fraction) -> float:
+#     if isinstance(offset, float):
+#         return offset
+#     elif isinstance(offset, fractions.Fraction):
+#         return offset.numerator / offset.denominator
+#     else:
+#         raise TypeError("Offset was not a float or a fraction")
 
 def get_piano_stream(base_stream):
     def piano_filter(part_el):
@@ -205,30 +203,30 @@ def extract_notes(piano_stream, interval):
     
 #     return notes, time_bounds
     
-def check_overlap(slot_bounds, note_bounds):
-    slot_l, slot_u = slot_bounds
-    note_l, note_u = note_bounds
+# def check_overlap(slot_bounds, note_bounds):
+#     slot_l, slot_u = slot_bounds
+#     note_l, note_u = note_bounds
 
-    note_is_subset = slot_l <= note_l and slot_u > note_u
-    slot_is_subset = note_l <= slot_l and note_u > slot_u
-    note_lower_overlaps = slot_l <= note_l < slot_u
-    note_upper_overlaps = slot_l < note_u <= slot_u
+#     note_is_subset = slot_l <= note_l and slot_u > note_u
+#     slot_is_subset = note_l <= slot_l and note_u > slot_u
+#     note_lower_overlaps = slot_l <= note_l < slot_u
+#     note_upper_overlaps = slot_l < note_u <= slot_u
 
-    return note_is_subset or slot_is_subset or note_lower_overlaps or note_upper_overlaps
+#     return note_is_subset or slot_is_subset or note_lower_overlaps or note_upper_overlaps
 
-def separate_sequence(notes, time_bounds):
-    time_start, time_end = time_bounds
-    step_size = 1
-    seq = [None for _ in range(0, math.ceil(time_end), step_size)]
-    for t, _ in enumerate(seq):
-        slot_bounds = t * step_size, (t + 1) * step_size
-        for n, note_bounds in notes:
-            is_overlapping = check_overlap(slot_bounds=slot_bounds, note_bounds=note_bounds)
-            if is_overlapping:
-                if seq[t] is not None:
-                    print("Double place")
-                seq[t] = n
-    return seq
+# def separate_sequence(notes, time_bounds):
+#     time_start, time_end = time_bounds
+#     step_size = 1
+#     seq = [None for _ in range(0, math.ceil(time_end), step_size)]
+#     for t, _ in enumerate(seq):
+#         slot_bounds = t * step_size, (t + 1) * step_size
+#         for n, note_bounds in notes:
+#             is_overlapping = check_overlap(slot_bounds=slot_bounds, note_bounds=note_bounds)
+#             if is_overlapping:
+#                 if seq[t] is not None:
+#                     print("Double place")
+#                 seq[t] = n
+#     return seq
 
 def get_all_files(root_folder):
     p = Path(root_folder)
@@ -247,25 +245,6 @@ def process_all_files(root_folder):
 def save_rep_seqs_to_file(filename, rep_seqs):
     with open(filename, 'wb') as f:
         pickle.dump(rep_seqs, f)
-
-def convert_midi_directory(midi_directory, mxl_directory):
-    p = Path(midi_directory)
-    for subpath in p.iterdir():
-        convert_file_to_mxl(midi_filename=subpath, mxl_directory=mxl_directory)
-
-def convert_file_to_mxl(midi_filename, mxl_directory):
-    p = Path(midi_filename)
-    mxl_filename = f'{p.stem}.mid'
-    mxl_pathname = str(Path(mxl_directory) / mxl_filename)
-
-    conversion_tokens = ['mscore', '-o', mxl_pathname, midi_filename]
-    subprocess.run(conversion_tokens, stderr=subprocess.DEVNULL)
-
-def show_files_in_msc(music_directory):
-    p = Path(music_directory)
-    for subpath in p.iterdir():
-        s = music21.converter.parse(subpath)
-        s.show()
 
 def smallest_interval_in_file(music_file):
     s = music21.converter.parse(music_file)
