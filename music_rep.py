@@ -1,3 +1,31 @@
+import music21
+
 class MusicInstance:
     def __init__(self):
+        self.objs = frozenset()
+    
+    def add_m21_obj(self, m21_obj):
+        internal_obj = self.m21_to_internal(m21_obj)
+        self.objs |= {internal_obj}
+    
+    def m21_to_internal(self, m21_obj):
+        if isinstance(m21_obj, music21.note.Note):
+            return m21_obj.pitch.midi, 1
+        elif isinstance(m21_obj, music21.chord.Chord):
+            return m21_obj.root().midi, m21_obj.multisetCardinality
+        elif m21_obj is None:
+            return None, 0
+        else:
+            raise TypeError("Foreign music21 object, cannot make rep")
+
+    def to_m21_objs(self):
         raise NotImplementedError
+    
+    def __hash__(self) -> int:
+        return hash(self.objs)
+
+    def __repr__(self) -> str:
+        return str(self.objs)
+
+def make_m21_stream(music_rep_seq):
+    raise NotImplementedError
