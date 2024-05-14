@@ -21,7 +21,11 @@ def get_piano_stream(base_stream):
 def preprocess_file(filename, interval):
     s = music21.converter.parse(filename)
 
-    piano_stream = get_piano_stream(base_stream=s)
+    should_parse_piano = not filename.endswith('mid')
+    if should_parse_piano:
+        piano_stream = get_piano_stream(base_stream=s)
+    else:
+        piano_stream = s
     music_buckets = extract_music_buckets(piano_stream=piano_stream, interval=interval)
     return music_buckets
 
@@ -36,6 +40,11 @@ def extract_music_buckets(piano_stream, interval):
     start_offset = song_bottom_offset - song_bottom_offset % interval # round down to the nearest interval
     num_buckets = int((top_time - start_offset) // interval)
 
+    # for n in ns:
+    #     print(n.fullName, n.getOffsetBySite(ns), n.duration.quarterLength)
+
+    # print('\n\n\n\n\n\n\n\n\n\n')
+
     buckets = [None] * num_buckets
     for offset_idx in range(num_buckets):
         offset_start = offset_idx * interval + start_offset
@@ -46,11 +55,14 @@ def extract_music_buckets(piano_stream, interval):
         elems = ns.getElementsByOffset(
             offsetStart=offset_start,
             offsetEnd=offset_end,
+            mustBeginInSpan=False,
             includeEndBoundary=False,
             includeElementsThatEndAtStart=False,
         )
+        # print("num elems in chunk", offset_start, offset_end, len(elems))
         for elem in elems:
-            music_instance_obj.add_m21_obj(elem)
+            attack = offset_start <= elem.getOffsetBySite(ns) < offset_end
+            music_instance_obj.add_m21_obj(elem, attack)
         buckets[offset_idx] = music_instance_obj
     
     return buckets
@@ -67,9 +79,9 @@ def fix_graces(streamIter) -> None:
 def process_all_files(root_folder, interval):
     all_files = get_all_files(root_folder)
     all_rep_seqs = []
-    for _, filename in enumerate(all_files):
-        # if ix % 1000 == 0:
-        #     print("Processing", filename, ix)
+    for ix, filename in enumerate(all_files):
+        if ix % 5000 == 0:
+            print("Processing", filename, ix)
         try:
             rep_seq = preprocess_file(filename, interval=interval)
         except JazzGenException as e:
@@ -107,10 +119,12 @@ def smallest_interval_in_file(music_file):
         return float('inf')
 
 if __name__ == '__main__':
-    root_folder = 'raw_data'
-    out_filename = 'cached/muse_rep_seqs.pkl'
+    root_folder = 'raw_data/muse'
+    out_filename = 'cached/dur2_rep_seqs.pkl'
+    # root_folder = 'misc/jazznet_toy'
+    # out_filename = 'cached/toy_rep_seqs.pkl'
 
     # interval = calculate_smallest_interval(music_directory='tests/muse') # TODO: EXAMINE THIS! TRADEOFFS ARE BETWEEN USING THE MOST FINE-GRAINED INTERVAL FROM THE CORPUS OR A MORE COARSE APPROACH
-    fixed_interval = 0.25 # 16th note buckets
+    fixed_interval = 0.5 # 8th note buckets
     all_rep_seqs = process_all_files(root_folder, interval=fixed_interval)
     utils.store_pickle_data(filename=out_filename, data=all_rep_seqs)
