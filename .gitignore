@@ -2,3 +2,4 @@ __pycache__
 test.py
 misc/
 jazzgen-env/
+raw_data/training
