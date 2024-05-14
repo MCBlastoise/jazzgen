@@ -93,8 +93,8 @@ def make_m21_stream(music_rep_seq):
             m21_attack_obj = mi1.internal_to_m21(internal_obj=full_attack_obj, obj_duration=obj_duration)
             song_stream.insert(offset, m21_attack_obj)
 
-        remaining_m21_objs = mi1.to_m21_objs(obj_duration=interval)
-        for obj in remaining_m21_objs:
-            song_stream.insert(offset, obj)
+        # remaining_m21_objs = mi1.to_m21_objs(obj_duration=interval)
+        # for obj in remaining_m21_objs:
+        #     song_stream.insert(offset, obj)
     
     return song_stream

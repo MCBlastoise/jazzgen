@@ -5,16 +5,6 @@ import music_rep
 import train_jazzgen
 import random
 
-def load_model(model_filename, rep_corpus, temp=0.0):
-    vocab_size = tagset_size = len(rep_corpus)
-
-    state_dict = torch.load(model_filename)
-    model = JazzGenModel(vocab_size=vocab_size, tagset_size=tagset_size, temp=temp)
-    model.load_state_dict(state_dict)
-    model.eval()
-
-    return model
-
 def generate_music_rep_sequence(model, rep_corpus, desired_len, max_comprehension_len):
     if desired_len < 1:
         raise Exception("Desired sequence length must be at least 1")
@@ -71,11 +61,11 @@ if __name__ == '__main__':
 
     corpus_filename = 'cached/dur2_rep_corpus.pkl'
     model_filename = 'cached/dur2_model.pt'
-    midi_filename = 'outputs/muse19.midi'
+    midi_filename = 'outputs/muse20.midi'
     seq_len = 256
     
     rep_corpus = utils.access_pickle_data(filename=corpus_filename)
-    model = load_model(model_filename=model_filename, rep_corpus=rep_corpus, temp=2)
+    model = utils.load_model(model_filename=model_filename, rep_corpus=rep_corpus, temp=2.0)
     music_rep_seq = generate_music_rep_sequence(model=model, rep_corpus=rep_corpus, desired_len=seq_len, max_comprehension_len=40)
     m21_stream = music_rep.make_m21_stream(music_rep_seq=music_rep_seq)
     utils.stream_to_midi(stream=m21_stream, filename=midi_filename)

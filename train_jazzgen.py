@@ -48,7 +48,7 @@ def prepare_sequence(seq, rep_corpus):
     idxs = [rep_corpus[rep] for rep in seq]
     return torch.tensor(idxs, dtype=torch.long)
 
-def train_model(rep_seqs, rep_corpus: dict[tuple[int, int], int]):
+def train_model(rep_seqs, rep_corpus: dict[tuple[int, int], int], num_epochs):
     # These will usually be more like 32 or 64 dimensional.
     # We will keep them small, so we can see how the weights change as we train.
 
@@ -62,8 +62,7 @@ def train_model(rep_seqs, rep_corpus: dict[tuple[int, int], int]):
     loss_function = torch.nn.NLLLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 
-    NUM_EPOCHS = 5
-    for epoch in range(NUM_EPOCHS):  # again, normally you would NOT do 300 epochs, it is toy data
+    for epoch in range(num_epochs):  # again, normally you would NOT do 300 epochs, it is toy data
         print(f"Starting epoch {epoch + 1}")
         
         training_data = list(make_training_data(rep_seqs=rep_seqs))
@@ -92,10 +91,6 @@ def train_model(rep_seqs, rep_corpus: dict[tuple[int, int], int]):
 
     return model
 
-def save_model(model, filename):
-    state_dict = model.state_dict()
-    torch.save(state_dict, filename)
-
 if __name__ == '__main__':
     # rep_seqs_filename = 'cached/muse_rep_seqs.pkl'
     # corpus_cache_filename = 'cached/muse_rep_corpus.pkl'
@@ -116,5 +111,5 @@ if __name__ == '__main__':
     rep_seqs = utils.access_pickle_data(filename=rep_seqs_filename)
     rep_corpus = make_corpus(rep_seqs=rep_seqs, corpus_cache_filename=corpus_cache_filename, use_cache=False)
 
-    model = train_model(rep_seqs=rep_seqs, rep_corpus=rep_corpus)
-    save_model(model=model, filename=model_filename)
+    model = train_model(rep_seqs=rep_seqs, rep_corpus=rep_corpus, num_epochs=5)
+    utils.save_model(model=model, filename=model_filename)
