@@ -13,7 +13,8 @@ def store_pickle_data(filename, data):
         pickle.dump(data, f)
 
 def stream_to_midi(stream, filename):
-    raise NotImplementedError
+    fp = stream.write('midi', fp=filename)
+    return fp
 
 def convert_midi_directory(midi_directory, mxl_directory):
     p = Path(midi_directory)
